@@ -66,7 +66,7 @@ print(list(postStats.values())[-1][0][1] + " created: " + str(list(postStats.val
 
 def subredditPost_csv():
     upload_count = 0
-    location = "\\Reddit Data\\"
+    location = ".\\data\\"
     print("input filename of submission file, please add .csv")
     filename = input()
     file = location + filename
