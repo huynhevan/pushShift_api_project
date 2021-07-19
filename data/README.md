@@ -1,0 +1,1 @@
+Directory used for collecting different sub-reddit data
