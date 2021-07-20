@@ -16,8 +16,10 @@ import datetime as dt;
 
 def getPushShiftData(after, before, subreddit):
     url = 'https://api.pushshift.io/reddit/search/submission/?after='+str(after)+'&before='+str(before)+'&subreddit='+str(subreddit)
-    print(url)
+    #print(url)
     r = requests.get(url)
+    print(r.text)
+    print("hi")
     data = json.loads(r.text);
     return data['data']
 
@@ -37,10 +39,8 @@ def cleanText(text):
 def parseData(post):
     postData = list()
     try:
-        print(type(post['title']))
         title = cleanText(post['title'])
     except KeyError:
-        print("test")
         title = "NaN"
     sub_id = post['id']
     #author = post['author']
@@ -51,7 +51,7 @@ def parseData(post):
 
 sub = 'wallstreetbets'
 before = "1626101654"
-after = "1626015254"
+after = "1626089147"
 postStats = {}
 postCount = 0
 
@@ -75,7 +75,7 @@ print(list(postStats.values())[-1][0][1] + " created: " + str(list(postStats.val
 
 def subredditPost_csv():
     upload_count = 0
-    location = ".\\data\\"
+    location = "/homes/iws/evhuynh/summerProj2021/data/"
     print("input filename of submission file, please add .csv")
     filename = input()
     file = location + filename
