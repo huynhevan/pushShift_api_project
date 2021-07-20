@@ -3,6 +3,8 @@ import pandas
 import csv
 import json
 import requests
+import string
+import re
 from requests.api import post
 api = PushshiftAPI();
 
@@ -19,28 +21,37 @@ def getPushShiftData(after, before, subreddit):
     data = json.loads(r.text);
     return data['data']
 
+def cleanText(text):
+    # remove punctuation except $
+    cleaned = text.translate(str.maketrans(' ', ' ', string.punctuation.replace('$','') + '’')).lower()
+    # remove links (http)
+    cleaned = re.sub("http\w+", " ", cleaned)
+    # remove digits
+    cleaned = cleaned.translate({ord(k): None for k in string.digits})
+    # remove tabs/newlines
+    cleaned = cleaned.replace("\n", " ").replace("\t", " ").strip()
+    # remove double space
+    cleaned = re.sub(' +', ' ', cleaned)
+    return cleaned
+
 def parseData(post):
     postData = list()
-    title = post['title']
-    url = post['url']
     try:
-        flair = post['link_flair_text']
+        print(type(post['title']))
+        title = cleanText(post['title'])
     except KeyError:
-        flair= "NaN"
-    author = post['author']
+        print("test")
+        title = "NaN"
     sub_id = post['id']
-    score = post['score']
+    #author = post['author']
     created = dt.datetime.fromtimestamp(post['created_utc'])
-#1520561700.0
-    numComms = post['num_comments']
-    permalink = post['permalink']
-    postData.append((sub_id,title,url,author,score,created,numComms,permalink,flair))
+    postData.append((sub_id, title, created))
     postStats[sub_id] = postData
 
 
-sub = 'seahawks'
-before = "1626249166"
-after = "1626162766"
+sub = 'wallstreetbets'
+before = "1626101654"
+after = "1626015254"
 postStats = {}
 postCount = 0
 
@@ -52,17 +63,15 @@ while(len(data) > 0):
         parseData(submission)
         postCount+=1
     # calls pushShiftData() with the created date of the last submission
-    print(len(data))
     print(str(dt.datetime.fromtimestamp(data[-1]['created_utc'])))
     after = data[-1]['created_utc']
     data = getPushShiftData(after, before, sub)
 
-print(len(data))
 print(str(len(postStats)) + " submissions have been added to list")
 print("1st entry is:")
-print(list(postStats.values())[0][0][1] + " created: " + str(list(postStats.values()) [0][0][5]))
+print(list(postStats.values())[0][0][1] + " created: " + str(list(postStats.values()) [0][0][2]))
 print("last entry is:")
-print(list(postStats.values())[-1][0][1] + " created: " + str(list(postStats.values()) [-1][0][5]))
+print(list(postStats.values())[-1][0][1] + " created: " + str(list(postStats.values()) [-1][0][2]))
 
 def subredditPost_csv():
     upload_count = 0
@@ -72,7 +81,7 @@ def subredditPost_csv():
     file = location + filename
     with open(file, 'w', newline='', encoding='utf-8') as file:
         a = csv.writer(file, delimiter=',')
-        headers=["Post ID", "Title", "Url", "Author", "Score", "Publish Date", "Total No. of Comments", "Permalink", "Flair"]
+        headers=["Post ID", "Title", "Publish Date"]
         a.writerow(headers)
         for post in postStats:
             a.writerow(postStats[post][0])
@@ -83,26 +92,3 @@ subredditPost_csv()
 
 
 
-"""
-start_epoch = int(dt.datetime(2021, 7, 12).timestamp())
-
-url = 'https://api.pushshift.io/reddit/search/submission/?after=1626162766&before=1626249166&subreddit=seahawks'
-
-print(url)
-r = requests.get(url)
-data = json.loads(r.text)
-
-temp = list(api.search_submissions(
-    after=start_epoch,
-    subreddit='seahawks',
-    filter=['url', 'author', 'title', 'subreddit'],
-    #filter=['title'],
-    limit=1
-)) 
-
-for i in temp:
-    s = str(i);
-    s = s[s.find("(")+1:s.rfind(")")]
-    print(s)
-    print("")
-    """
