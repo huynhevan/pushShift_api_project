@@ -1,5 +1,5 @@
 from psaw import PushshiftAPI
-import pandas
+import pandas as pd
 import csv
 import json
 import requests
@@ -9,7 +9,7 @@ from requests.api import post
 import time
 import datetime as dt;
 
-api = PushshiftAPI();
+api = PushshiftAPI()
 
 #url = 'https://api.pushshift.io/reddit/search/submission/?after=1626162766&before=1626249166&subreddit=seahawks'
 
@@ -24,7 +24,7 @@ def getPushShiftData(after, before, subreddit):
         r = requests.get(url)
 
     global countRequest
-    data = json.loads(r.text);
+    data = json.loads(r.text)
     return data['data']
 
 def cleanText(text):
@@ -42,7 +42,7 @@ def cleanText(text):
 
 #checks for removed/deleted posts
 def validPost(post):
-    return ("link_flair_text" in post 
+    return ("link_flair_text" in post
     and post['link_flair_css_class']
     and "selftext" in post
     and post['selftext'] != "removed"
@@ -83,6 +83,9 @@ def subredditPost_csv(postStats):
             a.writerow(postStats[post][0])
             upload_count+=1
         print(str(upload_count) + " posts have been uploaded")
+    df = pd.read_csv(location + filename)
+    df.drop_duplicates()
+    df.to_csv(location + "no_dup_" + filename, index=False)
 
 def main():
     sub = 'wallstreetbets'
