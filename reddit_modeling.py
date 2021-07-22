@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 reddit_data = pd.read_csv('.\\data\\cleanedWSB_data.csv')
 
-features = ['Title']
+features = ['Title', 'Text']
 x = reddit_data[features]
 y = reddit_data.subreddit
 
