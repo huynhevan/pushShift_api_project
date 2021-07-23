@@ -84,7 +84,7 @@ def subredditPost_csv(postStats):
             upload_count+=1
         print(str(upload_count) + " posts have been uploaded")
     df = pd.read_csv(location + filename)
-    df.drop_duplicates(subset=None, inplace=True)
+    df.drop_duplicates(subset=['Title', 'Text'], inplace=True)
     df.to_csv(location + "no_dup_" + filename, index=False)
 
 def main():
