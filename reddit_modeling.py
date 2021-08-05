@@ -16,20 +16,3 @@ y = reddit_data.subreddit
 
 x_train, x_test, y_train, y_test = train_test_split(X, y, random_state=42,
                                                     test_size=0.50)
-
-clf = SVC(kernel='linear', C=3)
-
-le = preprocessing.LabelEncoder()
-for i in range(2):
-  x_train[:,i] = le.fit_transform(x_train[:,i])
-clf.fit(x_train, y_train)
-
-clf2 = DecisionTreeClassifier()
-clf2.fit(x_train, y_train)
-
-clf3 = RandomForestClassifier()
-clf3.fit(x_train, y_train)
-
-print(f'SVC : {clf.score(x_test, y_test)}')
-print(f'DTC : {clf2.score(x_test, y_test)}')
-print(f'RFC : {clf3.score(x_test, y_test)}')
