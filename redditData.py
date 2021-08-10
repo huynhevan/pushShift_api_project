@@ -1,5 +1,5 @@
 from psaw import PushshiftAPI
-import pandas
+import pandas as pd
 import csv
 import json
 import requests
@@ -8,6 +8,17 @@ import re
 from requests.api import post
 import time
 import datetime as dt;
+
+import nltk
+from nltk.stem import WordNetLemmatizer
+
+import sparknlp
+from sparknlp.base import *
+from sparknlp.common import *
+from sparknlp.annotator import *
+from sparknlp.training import *
+from pyspark.ml import Pipeline
+
 
 api = PushshiftAPI();
 
@@ -27,6 +38,14 @@ def getPushShiftData(after, before, subreddit):
     data = json.loads(r.text);
     return data['data']
 
+def init_spark():
+    spark = SparkSession \
+        .builder \
+        .appName("Python Spark SQL basic example") \
+        .config("spark.some.config.option", "some-value") \
+        .getOrCreate()
+    return spark
+
 def cleanText(text):
     # remove punctuation except $
     cleaned = text.translate(str.maketrans(' ', ' ', string.punctuation.replace('$','') + '’')).lower()
@@ -38,6 +57,12 @@ def cleanText(text):
     cleaned = cleaned.replace("\n", " ").replace("\t", " ").strip()
     # remove double space
     cleaned = re.sub(' +', ' ', cleaned)
+    
+    wnl = WordNetLemmatizer()
+
+    list2 = nltk.word_tokenize(cleaned)
+   # cleaned = ' '.join([wnl.lemmatize(words) for words in list2])
+
     return cleaned
 
 #checks for removed/deleted posts
@@ -69,8 +94,8 @@ def parseData(post, postStats):
 
 def subredditPost_csv(postStats):
     upload_count = 0
-    #location = "/homes/iws/evhuynh/summerProj2021/data/"
-    location = ".\\data\\"
+    location = "/homes/iws/evhuynh/summerProj2021/data/"
+    #location = ".\\data\\"
     print("input filename of submission file, please add .csv")
     filename = input()
     file = location + filename
@@ -83,12 +108,15 @@ def subredditPost_csv(postStats):
             a.writerow(postStats[post][0])
             upload_count+=1
         print(str(upload_count) + " posts have been uploaded")
-
+    df = pd.read_csv(location + filename)
+    df.drop_duplicates(subset=['Title', 'Text'], inplace=True)
+    df.to_csv(location + "no_dup_" + filename, index=False)
+    
 def main():
-    sub = 'wallstreetbets'
-    before = "1626757785"
-    after = "1626611136"
-    #after = "1626264571"
+    sub = 'overwatch'
+    before = "1626854216"
+    #after = "1624262216"
+    after = "1626815895"
     postStats = {}
     postCount = 0
 
@@ -109,6 +137,8 @@ def main():
     print(list(postStats.values())[0][0][1] + " created: " + str(list(postStats.values()) [0][0][4]))
     print("last entry is:")
     print(list(postStats.values())[-1][0][1] + " created: " + str(list(postStats.values()) [-1][0][4]))
+
+    print(list(postStats.values())[0][0][1])
     subredditPost_csv(postStats)
 
 
