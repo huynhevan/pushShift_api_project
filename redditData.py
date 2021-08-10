@@ -35,7 +35,7 @@ def getPushShiftData(after, before, subreddit):
         r = requests.get(url)
 
     global countRequest
-    data = json.loads(r.text);
+    data = json.loads(r.text)
     return data['data']
 
 def init_spark():
@@ -67,7 +67,7 @@ def cleanText(text):
 
 #checks for removed/deleted posts
 def validPost(post):
-    return ("link_flair_text" in post 
+    return ("link_flair_text" in post
     and post['link_flair_css_class']
     and "selftext" in post
     and post['selftext'] != "removed"
@@ -102,16 +102,18 @@ def subredditPost_csv(postStats):
     # writes to csv file
     with open(file, 'w', newline='', encoding='utf-8') as file:
         a = csv.writer(file, delimiter=',')
-        headers=["Post ID", "Title", "Text", "Label", "Publish Date"]
+        headers=["id", "title", "text", "label", "date"]
         a.writerow(headers)
         for post in postStats:
             a.writerow(postStats[post][0])
             upload_count+=1
         print(str(upload_count) + " posts have been uploaded")
     df = pd.read_csv(location + filename)
-    df.drop_duplicates(subset=['Title', 'Text'], inplace=True)
+    df.drop_duplicates(subset=['title', 'text'], inplace=True)
+    # Need to have a column indicating which subreddit is which (1 = wallstreetbets, 2 = investing)
+    df['subreddit'] = 1
     df.to_csv(location + "no_dup_" + filename, index=False)
-    
+
 def main():
     sub = 'overwatch'
     before = "1626854216"
