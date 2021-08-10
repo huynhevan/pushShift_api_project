@@ -57,12 +57,6 @@ def cleanText(text):
     cleaned = cleaned.replace("\n", " ").replace("\t", " ").strip()
     # remove double space
     cleaned = re.sub(' +', ' ', cleaned)
-    
-    wnl = WordNetLemmatizer()
-
-    list2 = nltk.word_tokenize(cleaned)
-   # cleaned = ' '.join([wnl.lemmatize(words) for words in list2])
-
     return cleaned
 
 #checks for removed/deleted posts
